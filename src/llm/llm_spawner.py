@@ -24,23 +24,26 @@ from langchain_ollama import OllamaEmbeddings
 # ============================================
 
 
-def get_llm():
+def get_llm(temperature: float = 0.7):
     """
     Get the LLM based on provider and model from config
+
+    Args:
+        temperature (float): Sampling temperature (0-2). Higher = more creative, Lower = more deterministic
 
     Returns:
         LLM instance (ChatOpenAI, ChatAnthropic, or ChatOllama)
     """
-    print(f"🤖 Initializing LLM: {LLM_PROVIDER} ({LLM_MODEL})")
+    print(f"🤖 Initializing LLM: {LLM_PROVIDER} ({LLM_MODEL}) - Temperature: {temperature}")
 
     if LLM_PROVIDER == "openai":
-        return ChatOpenAI(model=LLM_MODEL, api_key=OPENAI_API_KEY)
+        return ChatOpenAI(model=LLM_MODEL, api_key=OPENAI_API_KEY, temperature=temperature)
     elif LLM_PROVIDER == "anthropic":
         return ChatAnthropic(
-            model_name=LLM_MODEL, api_key=ANTHROPIC_API_KEY, timeout=None, stop=None
+            model_name=LLM_MODEL, api_key=ANTHROPIC_API_KEY, temperature=temperature, timeout=None, stop=None
         )
     elif LLM_PROVIDER == "ollama":
-        return ChatOllama(model=LLM_MODEL, base_url=OLLAMA_HOST)
+        return ChatOllama(model=LLM_MODEL, base_url=OLLAMA_HOST, temperature=temperature)
     else:
         raise ValueError(f"❌ Unknown provider: {LLM_PROVIDER}")
 
