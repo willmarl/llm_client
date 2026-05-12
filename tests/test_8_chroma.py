@@ -64,6 +64,20 @@ try:
 except Exception as e:
     print(f"read all DB failed ❌: {e}")
 
+try:
+    x = cc.read("cat", filter={"type": "text"})
+    if isinstance(x, list) and len(x) > 0:
+        print("read with filter passed ✅")
+except Exception as e:
+    print(f"read with filter failed ❌: {e}")
+
+try:
+    x = cc.readAll(filter={"type": "text"})
+    if isinstance(x, dict) and "documents" in x:
+        print("readAll with filter passed ✅")
+except Exception as e:
+    print(f"readAll with filter failed ❌: {e}")
+
 
 print("deleting up test db made")
 folder = Path("test_db")

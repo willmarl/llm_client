@@ -185,7 +185,7 @@ will convert text to langchain doc -> if `autoSplit` is `True` then wil split ba
 
 ### READ - query DB
 
-> `cc.read(query, topK, printResults)`
+> `cc.read(query, topK, filter, printResults)`
 
 ```python
 cc = Ingest()
@@ -198,42 +198,46 @@ returns
 
 ```python
 [
-    Document(id='d88...', metadata={'type': 'text'}, page_content='Cats are fluffly pets that sleep all day'),
+    Document(id=’d88...’, metadata={‘type’: ‘text’}, page_content=’Cats are fluffly pets that sleep all day’),
     Document(
-        id='e753...',
-        metadata={'type': 'txt', 'source': 'british-shorthair.txt'},
-        page_content='undemanding, they’re content to observe household goings-on from a sunny windowsill. While not lap cats, they offer steady, easygoing companionship and tolerate children
-and other pets with'
+        id=’e753...’,
+        metadata={‘type’: ‘txt’, ‘source’: ‘british-shorthair.txt’},
+        page_content=’undemanding, they’re content to observe household goings-on from a sunny windowsill. While not lap cats, they offer steady, easygoing companionship and tolerate children
+and other pets with’
     ),
     Document(
-        id='dd351...',
-        metadata={'source': 'british-shorthair.txt', 'type': 'txt'},
-        page_content='The British Shorthair is a chunky, teddy-bear-like cat with a dense, plush coat (especially the iconic blue variety) and round copper eyes. Calm and undemanding, they’re
-content to observe household'
+        id=’dd351...’,
+        metadata={‘source’: ‘british-shorthair.txt’, ‘type’: ‘txt’},
+        page_content=’The British Shorthair is a chunky, teddy-bear-like cat with a dense, plush coat (especially the iconic blue variety) and round copper eyes. Calm and undemanding, they’re
+content to observe household’
     )
 ]
 ```
 
 **Description**:
-queries chroma db based of query text. by default returns 3 results.
+queries chroma db based of query text. by default returns 3 results. supports optional metadata filtering.
 
 **Parameters**:
 
 - query: `str`
 - topK: `int` default 3
+- filter: `dict` optional - metadata filter (e.g. `{"source": "file.txt"}` or `{"type": "txt"}`)
 - printResults: `bool` default false
 
-can do stuff like
+Basic example:
 
 ```python
 cc.read("cat", 1, True)
 ```
 
-returns
+With filtering:
 
 ```python
-Content: Cats are fluffly pets that sleep all day
-Metadata:{'type': 'text'}
+# Search for "cat" but only in documents from a specific file
+results = cc.read("cat", topK=3, filter={"source": "british-shorthair.txt"})
+
+# Search with multiple filter conditions
+results = cc.read("learning", topK=5, filter={"type": "txt"})
 ```
 
 **Returns**:
@@ -243,18 +247,28 @@ you can also do normal langchain chroma methods by doing
 
 ## read all docs from DB
 
-> `cc.readAll()`
+> `cc.readAll(filter)`
 
 ```python
 x = cc.readAll()
 print(x)
 ```
 
+With filtering:
+
+```python
+# Get all documents from a specific file
+all_from_file = cc.readAll(filter={"source": "british-shorthair.txt"})
+
+# Get all documents of a specific type
+txt_only = cc.readAll(filter={"type": "txt"})
+```
+
 **Description**:
-Initialize LLM for langchain. Gets the LLM based on provider and model from config.
+Retrieves all documents from the database with optional metadata filtering.
 
 **Parameters**:
-None
+- filter: `dict` optional - metadata filter (e.g. `{"source": "file.txt"}` or `{"type": "txt"}`)
 
 **Returns**:
 dict that contains

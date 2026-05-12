@@ -117,12 +117,18 @@ class Ingest:
         print("🟦 adding to DB")
         self.db.add_documents(data)
 
-    def read(self, query: str, topK: int = 3, printResults=False):
+    def read(self, query: str, topK: int = 3, filter: Optional[dict] = None, printResults=False):
         """
-        query relevant docs
+        query relevant docs with optional metadata filtering
+
+        Args:
+            query: search text
+            topK: number of results to return (default 3)
+            filter: metadata filter dict, e.g. {"source": "file.txt"} or {"topic": "backend"}
+            printResults: whether to print results to console
         """
         print("🟦reading from db")
-        results = self.db.similarity_search(query, k=topK)
+        results = self.db.similarity_search(query, k=topK, filter=filter)
         if printResults:
             for r in results:
                 print("Content:", r.page_content)
@@ -130,14 +136,18 @@ class Ingest:
                 print(r.metadata)
         return results
 
-    def readAll(self):
+    def readAll(self, filter: Optional[dict] = None):
         """
-        Retrieve all documents
+        Retrieve all documents with optional metadata filtering
+
+        Args:
+            filter: metadata filter dict, e.g. {"source": "file.txt"} or {"type": "txt"}
         """
         all_documents_data = self.db.get(
             # You can specify what to include, e.g., documents, metadatas, embeddings
             include=["documents", "metadatas", "embeddings"],
             limit=9999999,  # Use a very large number to get all, or implement pagination
+            where=filter,  # Chroma uses 'where' parameter for filtering
         )
         return all_documents_data
 
