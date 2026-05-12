@@ -24,7 +24,7 @@ convert raw text to langchain doc
 
 - langchain doc
 
-## Convert any text file to langchain document
+## Convert any text file to langchain documents
 
 > `load_any_file(file_path)`
 
@@ -33,19 +33,21 @@ from rich import print
 from llm_client import load_any_file
 
 file = "foo.txt"
-doc = load_any_file(file)
-print(type(doc))
-print(doc)
+docs = load_any_file(file)
+print(type(docs))
+print(docs)
 ```
 
 _print statements_:
 
 ```python
-<class 'langchain_core.documents.base.Document'>
-Document(
-    metadata={'source': 'foo.txt', 'type': 'txt'},
-    page_content='Lorem ipsum dolor sit amet...'
-)
+<class 'list'>
+[
+    Document(
+        metadata={'source': 'foo.txt', 'type': 'txt'},
+        page_content='Lorem ipsum dolor sit amet...'
+    )
+]
 ```
 
 **Description**:
@@ -53,6 +55,7 @@ Auto-detect and load file into LangChain Documents.
 Supports: PDF, DOCX, PPTX, XLSX, CSV, HTML, MD, JSON, TXT.
 Falls back to plain UTF-8 text if possible.
 Raises ValueError for unsupported binary files.
+Always returns a list of Documents for consistent handling.
 
 **Parameters**:
 
@@ -60,7 +63,7 @@ Raises ValueError for unsupported binary files.
 
 **Returns**:
 
-- langchain document
+- list of langchain documents
 
 ## Convert folder of files (if applicable) to langchain documents
 

@@ -34,8 +34,10 @@ except Exception as e:
 
 try:
     response = load_any_file(file_location)
-    if response:
+    if isinstance(response, list) and len(response) > 0:
         print("load_any_file passed ✅")
+    else:
+        print("load_any_file failed ❌: returned empty or wrong type")
 except Exception as e:
     print(f"load_any_file failed ❌: {e}")
 

@@ -26,6 +26,8 @@ def load_any_file(path: str | Path):
     Supports: PDF, DOCX, PPTX, XLSX, CSV, HTML, MD, JSON, TXT.
     Falls back to plain UTF-8 text if possible.
     Raises ValueError for unsupported binary files.
+
+    Always returns a list of Documents for consistency.
     """
     path = Path(path)
     if not path.exists():
@@ -55,9 +57,10 @@ def load_any_file(path: str | Path):
     # --- Fallback: plain text ---
     try:
         text = path.read_text(encoding="utf-8", errors="ignore")
-        return Document(
+        doc = Document(
             page_content=text, metadata={"source": str(path), "type": ext.lstrip(".")}
         )
+        return [doc]
     except Exception:
         raise ValueError(f"Unsupported or binary file: {path}")
 
@@ -75,9 +78,7 @@ def load_folder(folder: str | Path, recursive: bool = True, verbose: bool = True
     for path in folder.rglob("*") if recursive else folder.glob("*"):
         if path.is_file():
             try:
-                result = load_any_file(str(path))
-                # Handle both Document and list of Documents
-                docs = result if isinstance(result, list) else [result]
+                docs = load_any_file(str(path))
                 all_docs.extend(docs)
                 if verbose:
                     print(f"Loaded {len(docs)} docs from {path}")
