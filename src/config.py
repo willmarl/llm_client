@@ -13,6 +13,8 @@ LLM_MODEL = os.getenv("LLM_MODEL", "")
 # Text Embeddings settings
 TEXT_EMBEDDINGS_PROVIDER = os.getenv("TEXT_EMBEDDINGS_PROVIDER", "")
 TEXT_EMBEDDINGS_MODEL = os.getenv("TEXT_EMBEDDINGS_MODEL", "")
+QUERY_PREFIX = os.getenv("QUERY_PREFIX", "")
+DOCUMENT_PREFIX = os.getenv("DOCUMENT_PREFIX", "")
 
 # Image model settings
 IMAGE_MODEL_PROVIDER = os.getenv("IMAGE_MODEL_PROVIDER", "")

@@ -4,21 +4,13 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src import get_text_embeddings, generate_text_embeddings
-from config import IMAGE_PATH
+from src import get_text_embeddings, generate_text_embeddings, embed_single, embed_many
 
 print(
     """
-Running text embed tests of: get_text_embeddings(), generate_text_embeddings()
+Running text embed tests of: get_text_embeddings(), generate_text_embeddings(), embed_single(), embed_many()
 """
 )
-
-image_location = str(IMAGE_PATH)
-image_path = IMAGE_PATH
-
-if not image_path.exists():
-    print("Image not found. halting tests")
-    sys.exit(1)  # or just return if inside a function
 
 try:
     response = get_text_embeddings()
@@ -33,3 +25,53 @@ try:
         print("generate_text_embeddings passed ✅")
 except Exception as e:
     print(f"generate_text_embeddings failed ❌: {e}")
+
+try:
+    response = embed_single("Hello world")
+    if isinstance(response, list) and len(response) > 0:
+        print("embed_single (no prefix) passed ✅")
+except Exception as e:
+    print(f"embed_single failed ❌: {e}")
+
+try:
+    response = embed_single("Hello world", prefix="document")
+    if isinstance(response, list) and len(response) > 0:
+        print("embed_single (document prefix) passed ✅")
+except Exception as e:
+    print(f"embed_single (document prefix) failed ❌: {e}")
+
+try:
+    response = embed_many(["Hello", "World"])
+    if isinstance(response, list) and len(response) == 2:
+        print("embed_many (no prefix) passed ✅")
+except Exception as e:
+    print(f"embed_many failed ❌: {e}")
+
+try:
+    response = embed_many(["Hello", "World"], prefix="query")
+    if isinstance(response, list) and len(response) == 2:
+        print("embed_many (query prefix) passed ✅")
+except Exception as e:
+    print(f"embed_many (query prefix) failed ❌: {e}")
+
+try:
+    response = embed_single("Hello world", prefix="custom", custom_prefix="instruct: ")
+    if isinstance(response, list) and len(response) > 0:
+        print("embed_single (custom prefix) passed ✅")
+except Exception as e:
+    print(f"embed_single (custom prefix) failed ❌: {e}")
+
+try:
+    response = embed_many(["Hello", "World"], prefix="custom", custom_prefix="passage: ")
+    if isinstance(response, list) and len(response) == 2:
+        print("embed_many (custom prefix) passed ✅")
+except Exception as e:
+    print(f"embed_many (custom prefix) failed ❌: {e}")
+
+try:
+    response = embed_single("Hello world", prefix="custom")
+    print("embed_single (custom without custom_prefix) failed ❌: should have raised ValueError")
+except ValueError as e:
+    print("embed_single (custom without custom_prefix error handling) passed ✅")
+except Exception as e:
+    print(f"embed_single (custom without custom_prefix) failed ❌: {e}")

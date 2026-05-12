@@ -121,3 +121,72 @@ Input list of string to get list of float values (may be called vector). Intende
 **Returns**:
 
 - `List[float]` : multidimensional array
+
+## Embed single text with optional prefix
+
+> `def embed_single(text: str, prefix: Literal["none", "query", "document", "custom"] = "none", custom_prefix: str = "") -> List[float]`
+
+```python
+from llm_client import embed_single
+
+# No prefix
+embedding1 = embed_single("Cats are playful animals")
+
+# Use QUERY_PREFIX from env
+embedding2 = embed_single("What are cat behaviors?", prefix="query")
+
+# Use DOCUMENT_PREFIX from env
+embedding3 = embed_single("Cats are playful animals", prefix="document")
+
+# Custom prefix on the spot
+embedding4 = embed_single("Cats are playful", prefix="custom", custom_prefix="search_query: ")
+```
+
+**Description**:
+Embed a single text with optional prefix support. Different embedding models use different conventions for distinguishing queries vs documents (E5 uses "query:" and "passage:", Nomic uses "search_query" and "search_document", etc). This function lets you use env-configured defaults or override with custom prefixes.
+
+**Parameters**:
+
+- text `str`: Text to embed
+- prefix `Literal["none", "query", "document", "custom"]`: Prefix strategy
+  - "none": No prefix
+  - "query": Use QUERY_PREFIX from environment
+  - "document": Use DOCUMENT_PREFIX from environment
+  - "custom": Use custom_prefix parameter
+- custom_prefix `str`: Required if prefix="custom"
+
+**Returns**:
+
+- `List[float]`: Embedding vector
+
+## Embed multiple texts with optional prefix
+
+> `def embed_many(texts: List[str], prefix: Literal["none", "query", "document", "custom"] = "none", custom_prefix: str = "") -> List[List[float]]`
+
+```python
+from llm_client import embed_many
+
+texts = ["Cats are playful", "Dogs are loyal"]
+
+# No prefix
+embeddings1 = embed_many(texts)
+
+# Use DOCUMENT_PREFIX from env
+embeddings2 = embed_many(texts, prefix="document")
+
+# Custom prefix
+embeddings3 = embed_many(texts, prefix="custom", custom_prefix="passage: ")
+```
+
+**Description**:
+Embed multiple texts with optional prefix support. Same flexibility as embed_single but for batches.
+
+**Parameters**:
+
+- texts `List[str]`: List of texts to embed
+- prefix `Literal["none", "query", "document", "custom"]`: Prefix strategy
+- custom_prefix `str`: Required if prefix="custom"
+
+**Returns**:
+
+- `List[List[float]]`: List of embedding vectors

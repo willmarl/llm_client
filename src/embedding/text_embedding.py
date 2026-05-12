@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Literal
 from ..config import (
     OPENAI_API_KEY,
     ANTHROPIC_API_KEY,
@@ -14,6 +14,8 @@ from ..config import (
     IMAGE_EMBEDDINGS_PROVIDER,
     IMAGE_EMBEDDINGS_MODEL,
     IMAGE_CAPTION_PROMPT,
+    QUERY_PREFIX,
+    DOCUMENT_PREFIX,
 )
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
@@ -46,6 +48,82 @@ def generate_text_embeddings(texts: List[str]) -> List[List[float]]:
     embeddings_model = get_text_embeddings()
     print(f"📝 Generating embeddings for {len(texts)} texts...")
     embeddings = embeddings_model.embed_documents(texts)
+    print(f"✅ Generated embeddings with dimension: {len(embeddings[0])}")
+    return embeddings
+
+
+def embed_single(
+    text: str,
+    prefix: Literal["none", "query", "document", "custom"] = "none",
+    custom_prefix: str = "",
+) -> List[float]:
+    """
+    Embed a single text with optional prefix.
+
+    Args:
+        text: Text to embed
+        prefix: "none" (no prefix), "query" (use QUERY_PREFIX from env),
+                "document" (use DOCUMENT_PREFIX from env), or "custom"
+        custom_prefix: Required if prefix="custom"
+
+    Returns:
+        Embedding vector
+    """
+    if prefix == "custom" and not custom_prefix:
+        raise ValueError("custom_prefix required when prefix='custom'")
+
+    # Build final text
+    if prefix == "none":
+        final_text = text
+    elif prefix == "query":
+        final_text = f"{QUERY_PREFIX}{text}"
+    elif prefix == "document":
+        final_text = f"{DOCUMENT_PREFIX}{text}"
+    else:  # custom
+        final_text = f"{custom_prefix}{text}"
+
+    embeddings_model = get_text_embeddings()
+    print(f"📝 Embedding text (prefix={prefix}): {final_text[:50]}...")
+    embedding = embeddings_model.embed_query(final_text)
+    print(f"✅ Generated embedding with dimension: {len(embedding)}")
+    return embedding
+
+
+def embed_many(
+    texts: List[str],
+    prefix: Literal["none", "query", "document", "custom"] = "none",
+    custom_prefix: str = "",
+) -> List[List[float]]:
+    """
+    Embed multiple texts with optional prefix.
+
+    Args:
+        texts: List of texts to embed
+        prefix: "none" (no prefix), "query" (use QUERY_PREFIX from env),
+                "document" (use DOCUMENT_PREFIX from env), or "custom"
+        custom_prefix: Required if prefix="custom"
+
+    Returns:
+        List of embedding vectors
+    """
+    if prefix == "custom" and not custom_prefix:
+        raise ValueError("custom_prefix required when prefix='custom'")
+
+    # Build final texts
+    final_texts = []
+    for text in texts:
+        if prefix == "none":
+            final_texts.append(text)
+        elif prefix == "query":
+            final_texts.append(f"{QUERY_PREFIX}{text}")
+        elif prefix == "document":
+            final_texts.append(f"{DOCUMENT_PREFIX}{text}")
+        else:  # custom
+            final_texts.append(f"{custom_prefix}{text}")
+
+    embeddings_model = get_text_embeddings()
+    print(f"📝 Embedding {len(texts)} texts (prefix={prefix})...")
+    embeddings = embeddings_model.embed_documents(final_texts)
     print(f"✅ Generated embeddings with dimension: {len(embeddings[0])}")
     return embeddings
 
