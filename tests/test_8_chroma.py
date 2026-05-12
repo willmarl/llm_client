@@ -78,6 +78,28 @@ try:
 except Exception as e:
     print(f"readAll with filter failed ❌: {e}")
 
+try:
+    all_data = cc.readAll()
+    doc_id = all_data["ids"][0]
+    cc.update_by_id(doc_id, "Updated content: Cats are fluffy and love naps")
+    print("update_by_id passed ✅")
+except Exception as e:
+    print(f"update_by_id failed ❌: {e}")
+
+# update() requires interactive stdin — tested manually via exercise
+
+try:
+    all_data = cc.readAll()
+    doc_id = all_data["ids"][0]
+    cc.delete_by_id(doc_id)
+    after = cc.readAll()
+    if len(after["ids"]) == len(all_data["ids"]) - 1:
+        print("delete_by_id passed ✅")
+except Exception as e:
+    print(f"delete_by_id failed ❌: {e}")
+
+# delete() requires interactive stdin — tested manually via exercise
+
 
 print("deleting up test db made")
 folder = Path("test_db")

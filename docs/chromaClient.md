@@ -329,3 +329,89 @@ tolerate children and other pets with',
     ]
 }
 ```
+
+### UPDATE - modify existing docs
+
+Two methods depending on whether you already have the document ID.
+
+#### `cc.update_by_id(doc_id, new_content)` — programmatic
+
+Use when you already have the ID (e.g. from `readAll()["ids"]`):
+
+```python
+all_data = cc.readAll()
+doc_id = all_data["ids"][0]
+
+cc.update_by_id(doc_id, "Cats are majestic and independent animals")
+```
+
+Re-embeds the new content and replaces the old document in the DB.
+
+#### `cc.update(search_query, new_content, confirm)` — interactive
+
+Use when you don't know the ID and want to search first:
+
+```python
+cc.update("cats sleep", "Cats are majestic and independent animals")
+```
+
+```
+Found matching documents:
+  [0] (id: d8848d73...) Cats are fluffly pets that sleep all day
+  [1] (id: e7537682...) undemanding, they're content to observe household...
+Which to update? (enter number, -1 to cancel): 0
+  Old: 'Cats are fluffly pets that sleep all day'
+  New: 'Cats are majestic and independent animals'
+Confirm update? (y/n): y
+🟦 updated document d8848d73...
+```
+
+Skip the confirmation prompt with `confirm=False`:
+
+```python
+cc.update("cats sleep", "Cats are majestic and independent animals", confirm=False)
+```
+
+**Parameters**:
+- `search_query`: `str` — used to find candidate documents
+- `new_content`: `str` — replacement text (gets re-embedded automatically)
+- `confirm`: `bool` default `True` — whether to prompt before updating
+
+### DELETE - remove docs
+
+Two methods following the same pattern as update.
+
+#### `cc.delete_by_id(doc_id)` — programmatic
+
+```python
+all_data = cc.readAll()
+doc_id = all_data["ids"][0]
+
+cc.delete_by_id(doc_id)
+```
+
+#### `cc.delete(search_query, confirm)` — interactive
+
+```python
+cc.delete("outdated document")
+```
+
+```
+Found matching documents:
+  [0] (id: a1b2c3d4...) This document is outdated and should be removed...
+  [1] (id: e5f6g7h8...) Some other document...
+Which to delete? (enter number, -1 to cancel): 0
+  Deleting: 'This document is outdated and should be removed...'
+Confirm delete? (y/n): y
+🟦 deleted document a1b2c3d4...
+```
+
+Skip confirmation with `confirm=False`:
+
+```python
+cc.delete("outdated document", confirm=False)
+```
+
+**Parameters**:
+- `search_query`: `str` — used to find candidate documents
+- `confirm`: `bool` default `True` — whether to prompt before deleting

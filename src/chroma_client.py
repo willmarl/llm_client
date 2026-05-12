@@ -151,36 +151,102 @@ class Ingest:
         )
         return all_documents_data
 
-    # come back to this later, havnt decided how i want agent to be implemented
-    def update(
-        self,
-        # content: Union[Document, list, str],
-        # contentType: Literal["path", "text", None] = None,
-        # askFirst: bool = False,
-    ):
+    def update_by_id(self, doc_id: str, new_content: str):
         """
-        WIP DO NOT USE. USE `cc.db.update_document` INSTEAD
+        Update a document by its Chroma ID. Get IDs from readAll()["ids"].
         """
-        # idk whether to do Doc only search (Seems redudant) or to do
-        # what i had in mind and you search for something u want to update
-        # it spits out list of things u may want to update
+        self.db.update_document(doc_id, Document(page_content=new_content, metadata={"type": "text"}))
+        print(f"🟦 updated document {doc_id[:8]}...")
 
-        # first find content in DB
-        # if isinstance(content, str):
-        #     if contentType == "text":
-        #         result = self.read(content, 1)
-        #         proceed = input(f"Found content containing {result}. Replace with ")
-
-        # option to input file path or search text
-        # get the id and ask user if they want to continue (option to auto)
-        # updates doc
-        # self.db.update_document()
-        # print("🟦updating db")
-        print("🟥 updating db WIP. this does nothing")
-
-    def delete(self):
+    def update(self, search_query: str, new_content: str, confirm: bool = True):
         """
-        WIP DO NOT USE. USE `cc.db.delete()` INSTEAD
+        Interactive update: search for candidates, pick one, optionally confirm, then update.
+
+        Args:
+            search_query: text to search for matching documents
+            new_content: replacement text
+            confirm: if True, prompt user to confirm before updating (default True)
         """
-        print("🟥 delete from db WIP. this does nothing")
-        # print("🟦deleting from db")
+        query_embedding = self.db.embeddings.embed_query(search_query)
+        raw = self.db._collection.query(
+            query_embeddings=[query_embedding],
+            n_results=5,
+            include=["documents", "metadatas"],
+        )
+        ids = raw["ids"][0]
+        docs = raw["documents"][0]
+
+        if not ids:
+            print("🟥 No matching documents found")
+            return
+
+        print("Found matching documents:")
+        for i, (doc_id, text) in enumerate(zip(ids, docs)):
+            print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}...")
+
+        choice = int(input("Which to update? (enter number, -1 to cancel): "))
+        if choice == -1:
+            print("Cancelled")
+            return
+
+        selected_id = ids[choice]
+        selected_text = docs[choice]
+
+        if confirm:
+            print(f"  Old: '{selected_text[:60]}...'")
+            print(f"  New: '{new_content[:60]}...'")
+            proceed = input("Confirm update? (y/n): ")
+            if proceed.lower() != "y":
+                print("Cancelled")
+                return
+
+        self.update_by_id(selected_id, new_content)
+
+    def delete_by_id(self, doc_id: str):
+        """
+        Delete a document by its Chroma ID. Get IDs from readAll()["ids"].
+        """
+        self.db.delete(ids=[doc_id])
+        print(f"🟦 deleted document {doc_id[:8]}...")
+
+    def delete(self, search_query: str, confirm: bool = True):
+        """
+        Interactive delete: search for candidates, pick one, optionally confirm, then delete.
+
+        Args:
+            search_query: text to search for matching documents
+            confirm: if True, prompt user to confirm before deleting (default True)
+        """
+        query_embedding = self.db.embeddings.embed_query(search_query)
+        raw = self.db._collection.query(
+            query_embeddings=[query_embedding],
+            n_results=5,
+            include=["documents", "metadatas"],
+        )
+        ids = raw["ids"][0]
+        docs = raw["documents"][0]
+
+        if not ids:
+            print("🟥 No matching documents found")
+            return
+
+        print("Found matching documents:")
+        for i, (doc_id, text) in enumerate(zip(ids, docs)):
+            print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}...")
+
+        choice = int(input("Which to delete? (enter number, -1 to cancel): "))
+        if choice == -1:
+            print("Cancelled")
+            return
+
+        selected_id = ids[choice]
+        selected_text = docs[choice]
+
+        if confirm:
+            print(f"  Deleting: '{selected_text[:60]}...'")
+            proceed = input("Confirm delete? (y/n): ")
+            if proceed.lower() != "y":
+                print("Cancelled")
+                return
+
+        self.delete_by_id(selected_id)
