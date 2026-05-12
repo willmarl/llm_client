@@ -106,6 +106,51 @@ folder = Path("test_db")
 if folder.exists() and folder.is_dir():
     shutil.rmtree(folder)
 
+# --- Custom prefix tests ---
+print("""
+Running custom prefix tests
+""")
+
+from src import ConfigType
+from src.chroma_client import PrefixedEmbeddings
+from src.embedding.text_embedding import get_text_embeddings
+
+try:
+    prefix_config: ConfigType = {
+        "db_location": "test_db/prefix",
+        "query_prefix": "search: ",
+        "document_prefix": "passage: ",
+    }
+    cc_prefix = Ingest(config=prefix_config)
+    cc_prefix.create("Dogs are loyal and friendly companions", "text")
+    results = cc_prefix.read("dogs")
+    if isinstance(results, list) and len(results) > 0:
+        print("custom prefix create+read passed ✅")
+    else:
+        print("custom prefix create+read failed ❌: no results returned")
+except Exception as e:
+    print(f"custom prefix create+read failed ❌: {e}")
+
+try:
+    base = get_text_embeddings()
+    no_prefix = PrefixedEmbeddings(base, "", "")
+    with_prefix = PrefixedEmbeddings(base, "search: ", "passage: ")
+
+    vec_a = no_prefix.embed_query("cats")
+    vec_b = with_prefix.embed_query("cats")
+
+    if vec_a != vec_b:
+        print("prefix produces different embedding vector passed ✅")
+    else:
+        print("prefix produces different embedding vector failed ❌: vectors are identical")
+except Exception as e:
+    print(f"prefix embedding difference failed ❌: {e}")
+
+print("deleting prefix test db")
+folder = Path("test_db")
+if folder.exists() and folder.is_dir():
+    shutil.rmtree(folder)
+
 # try:
 #     cc = Ingest()
 #     if cc:

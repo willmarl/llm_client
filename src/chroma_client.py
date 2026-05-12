@@ -2,16 +2,35 @@ from typing import Literal, Optional, TypedDict, Union
 from rich import print
 from langchain_chroma import Chroma
 from .embedding.text_embedding import get_text_embeddings
-from .config import VECTOR_DB_LOCATION
+from .config import VECTOR_DB_LOCATION, QUERY_PREFIX, DOCUMENT_PREFIX
 from .splitter import splitter
 from .loaders import load_raw_text, load_any_file
 from langchain_core.documents import Document
+from langchain_core.embeddings import Embeddings
+
+
+class PrefixedEmbeddings(Embeddings):
+    def __init__(self, base: Embeddings, query_prefix: str = "", document_prefix: str = ""):
+        self.base = base
+        self.query_prefix = query_prefix
+        self.document_prefix = document_prefix
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return self.base.embed_documents([f"{self.document_prefix}{t}" for t in texts])
+
+    def embed_query(self, text: str) -> list[float]:
+        return self.base.embed_query(f"{self.query_prefix}{text}")
 
 
 # Load embeddings + vector store
-def db_instance(db_location: str = VECTOR_DB_LOCATION):
+def db_instance(
+    db_location: str = VECTOR_DB_LOCATION,
+    query_prefix: str = QUERY_PREFIX,
+    document_prefix: str = DOCUMENT_PREFIX,
+):
     print(f"🟦🗄️⏳ Creating DB instance at {db_location}, will take some time (~10sec)")
-    db = Chroma(persist_directory=db_location, embedding_function=get_text_embeddings())
+    embeddings = PrefixedEmbeddings(get_text_embeddings(), query_prefix, document_prefix)
+    db = Chroma(persist_directory=db_location, embedding_function=embeddings)
     return db
 
 
@@ -45,18 +64,24 @@ class ConfigType(TypedDict, total=False):
     autoSplit: bool
     splitter: SplitterConfig
     db_location: str
+    query_prefix: str
+    document_prefix: str
 
 
 class _ResolvedConfig(TypedDict):
     autoSplit: bool
     splitter: _ResolvedSplitterConfig
     db_location: str
+    query_prefix: str
+    document_prefix: str
 
 
 configDefault: ConfigType = {
     "autoSplit": True,
     "splitter": {"chunk_overlap": 50, "chunk_size": 200, "method": "recursive"},
     "db_location": VECTOR_DB_LOCATION,
+    "query_prefix": QUERY_PREFIX,
+    "document_prefix": DOCUMENT_PREFIX,
 }
 
 
@@ -68,7 +93,11 @@ class Ingest:
             print(
                 f"🟦No DB passed, will attempt to use DB based off configs: {self.config['db_location']}"
             )
-            db = db_instance(self.config["db_location"])
+            db = db_instance(
+                self.config["db_location"],
+                self.config["query_prefix"],
+                self.config["document_prefix"],
+            )
         else:
             print(f"🟦using db {db}")
 
