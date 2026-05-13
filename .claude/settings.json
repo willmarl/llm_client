@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(jpg|png|jpeg|gif\\)$\")",
+      "Bash(python examples/phase3/lesson4/exercise1.py)",
+      "Bash(python examples/phase3/lesson4/exercise2.py)",
+      "Bash(python tests/test_8_chroma.py)",
+      "Bash(python examples/phase3/lesson4/exercise3.py)",
+      "Bash(python examples/phase3/lesson4/exercise4.py)",
+      "Bash(grep -v \"^$\")",
+      "Bash(python tests/test_prefix_behavior.py)",
+      "Bash(python tests/test_9_prefix_verify.py)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 examples/phase4/lesson1/exercise1.py)",
+      "Bash(python3 examples/phase4/lesson1/exercise3.py)",
+      "Bash(python3 examples/phase4/lesson3/exercise1.py)",
+      "Bash(python3 examples/phase4/lesson3/exercise2.py)",
+      "Bash(python3 examples/phase4/lesson4/exercise1.py)"
+    ]
+  }
+}
