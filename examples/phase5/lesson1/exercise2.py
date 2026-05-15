@@ -1,0 +1,43 @@
+# StateGraph basics
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+
+from typing import TypedDict, cast
+from src import get_llm
+from langgraph.graph import StateGraph, START, END
+from rich import print
+
+
+class ChatState(TypedDict):
+    user_input: str
+    tone: str
+    response: str
+
+
+llm = get_llm()
+
+
+def chatbot_node(state: ChatState) -> dict:
+    """Call LLM with tone and return response."""
+    prompt = f"""Respond in a {state["tone"]} tone.
+
+User: {state["user_input"]}"""
+    response = llm.invoke(prompt)
+    return {"response": response.content}
+
+
+# Build graph
+graph_builder = StateGraph(ChatState)
+graph_builder.add_node("chatbot", chatbot_node)
+graph_builder.add_edge(START, "chatbot")
+graph_builder.add_edge("chatbot", END)
+
+graph = graph_builder.compile()
+
+# Run
+result = graph.invoke(
+    cast(ChatState, {"user_input": "What is LangGraph?", "tone": "pirate"})
+)
+print(result["response"])
