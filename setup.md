@@ -1,5 +1,5 @@
 ofc have ollama installed on pc
-need tesseract so
+need tesseract
 
 ```bash
 sudo apt-get install tesseract-ocr

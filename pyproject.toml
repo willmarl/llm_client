@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm_client"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain>=1.2",
+    "langchain-chroma",
+    "langchain-openai",
+    "langchain-anthropic",
+    "langchain-ollama",
+    "langchain-community",
+    "rich",
+    "pillow",
+    "replicate",
+    "unstructured",
+    "pdfminer-six",
+    "pi-heif",
+    "unstructured-inference",
+    "pdf2image",
+    "pytesseract",
+    "unstructured-pytesseract",
+    "questionary",
+    # torch and CLIP require manual install — see setup.md
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["llm_client*"]

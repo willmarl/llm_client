@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from typing import TypedDict, cast
-from src import get_llm
+from llm_client import get_llm
 from langgraph.graph import StateGraph, START, END
 from rich import print
 

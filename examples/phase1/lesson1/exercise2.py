@@ -5,7 +5,7 @@ from pathlib import Path
 # sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src import get_llm
+from llm_client import get_llm
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from rich import print
 

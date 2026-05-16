@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src import load_any_file, splitter
+from llm_client import load_any_file, splitter
 from rich import print
 
 # Load a document from the previous lesson

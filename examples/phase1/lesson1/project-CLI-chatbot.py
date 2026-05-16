@@ -4,8 +4,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src import get_llm
-from src.config import LLM_PROVIDER, LLM_MODEL
+from llm_client import get_llm
+from llm_client.config import LLM_PROVIDER, LLM_MODEL
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
 from rich import print
 
@@ -50,7 +50,7 @@ def switch_model(model_name: str) -> None:
         from langchain_openai import ChatOpenAI
         from langchain_anthropic import ChatAnthropic
         from langchain_ollama import ChatOllama
-        from src.config import OPENAI_API_KEY, ANTHROPIC_API_KEY, OLLAMA_HOST
+        from llm_client.config import OPENAI_API_KEY, ANTHROPIC_API_KEY, OLLAMA_HOST
 
         if provider == "openai":
             model = ChatOpenAI(model=model_part, api_key=OPENAI_API_KEY)

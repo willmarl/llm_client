@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src import embed_single, embed_many
+from llm_client import embed_single, embed_many
 from rich import print
 
 print("Text Embedding Demo")

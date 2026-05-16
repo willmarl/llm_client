@@ -1,0 +1,17 @@
+langchain>=1.2
+langchain-chroma
+langchain-openai
+langchain-anthropic
+langchain-ollama
+langchain-community
+rich
+pillow
+replicate
+unstructured
+pdfminer-six
+pi-heif
+unstructured-inference
+pdf2image
+pytesseract
+unstructured-pytesseract
+questionary

@@ -15,7 +15,24 @@
       "Bash(python3 examples/phase4/lesson1/exercise3.py)",
       "Bash(python3 examples/phase4/lesson3/exercise1.py)",
       "Bash(python3 examples/phase4/lesson3/exercise2.py)",
-      "Bash(python3 examples/phase4/lesson4/exercise1.py)"
+      "Bash(python3 examples/phase4/lesson4/exercise1.py)",
+      "Bash(python3 examples/phase5/lesson1/exercise1.py)",
+      "Bash(python3 examples/phase5/lesson1/exercise2.py)",
+      "Bash(python3 examples/phase5/lesson1/exercise3.py)",
+      "Bash(python3 examples/phase5/lesson3/exercise1.py)",
+      "Bash(python examples/phase5/lesson4/exercise1.py)",
+      "Bash(python examples/phase6/lesson1/exercise1.py)",
+      "Bash(python -c ' *)",
+      "Bash(python examples/phase6/lesson2/exercise1.py)",
+      "Bash(python examples/phase6/lesson3/exercise1.py)",
+      "Bash(python examples/phase6/lesson4/exercise1.py)",
+      "Bash(python examples/phase7/lesson1/exercise1.py)",
+      "Bash(python examples/phase7/lesson3/exercise1.py)",
+      "Bash(git mv *)",
+      "Bash(xargs sed -i 's/from src\\\\b/from llm_client/g')",
+      "Bash(.venv/bin/pip install *)",
+      "Bash(uv pip *)",
+      "Bash(/home/cat/repos/llm_client/.venv/bin/python -c \"from llm_client import get_llm, Ingest, load_any_file, generate_text_embeddings; print\\('OK'\\)\")"
     ]
   }
 }

@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src import Ingest, ConfigType, load_raw_text, splitter
+from llm_client import Ingest, ConfigType, load_raw_text, splitter
 from rich import print
 
 print("ChromaDB Create Demo — Adding Documents to Vector Store")
