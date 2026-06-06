@@ -10,7 +10,9 @@ from langchain_core.embeddings import Embeddings
 
 
 class PrefixedEmbeddings(Embeddings):
-    def __init__(self, base: Embeddings, query_prefix: str = "", document_prefix: str = ""):
+    def __init__(
+        self, base: Embeddings, query_prefix: str = "", document_prefix: str = ""
+    ):
         self.base = base
         self.query_prefix = query_prefix
         self.document_prefix = document_prefix
@@ -29,7 +31,9 @@ def db_instance(
     document_prefix: str = DOCUMENT_PREFIX,
 ):
     print(f"🟦🗄️⏳ Creating DB instance at {db_location}, will take some time (~10sec)")
-    embeddings = PrefixedEmbeddings(get_text_embeddings(), query_prefix, document_prefix)
+    embeddings = PrefixedEmbeddings(
+        get_text_embeddings(), query_prefix, document_prefix
+    )
     db = Chroma(persist_directory=db_location, embedding_function=embeddings)
     return db
 
@@ -146,7 +150,13 @@ class Ingest:
         print("🟦 adding to DB")
         self.db.add_documents(data)
 
-    def read(self, query: str, topK: int = 3, filter: Optional[dict] = None, printResults=False):
+    def read(
+        self,
+        query: str,
+        topK: int = 3,
+        filter: Optional[dict] = None,
+        printResults=False,
+    ):
         """
         query relevant docs with optional metadata filtering
 
@@ -184,7 +194,9 @@ class Ingest:
         """
         Update a document by its Chroma ID. Get IDs from readAll()["ids"].
         """
-        self.db.update_document(doc_id, Document(page_content=new_content, metadata={"type": "text"}))
+        self.db.update_document(
+            doc_id, Document(page_content=new_content, metadata={"type": "text"})
+        )
         print(f"🟦 updated document {doc_id[:8]}...")
 
     def update(self, search_query: str, new_content: str, confirm: bool = True):
@@ -196,14 +208,14 @@ class Ingest:
             new_content: replacement text
             confirm: if True, prompt user to confirm before updating (default True)
         """
-        query_embedding = self.db.embeddings.embed_query(search_query)
+        query_embedding = self.db.embeddings.embed_query(search_query)  # type: ignore
         raw = self.db._collection.query(
             query_embeddings=[query_embedding],
             n_results=5,
             include=["documents", "metadatas"],
         )
         ids = raw["ids"][0]
-        docs = raw["documents"][0]
+        docs = raw["documents"][0]  # type: ignore
 
         if not ids:
             print("🟥 No matching documents found")
@@ -231,6 +243,118 @@ class Ingest:
 
         self.update_by_id(selected_id, new_content)
 
+    def create_from_embedding(
+        self,
+        embedding: list[float],
+        doc_id: str,
+        document: str = "",
+        metadata: Optional[dict] = None,
+    ):
+        """
+        Store a pre-computed embedding (e.g. from CLIP) directly, bypassing the text embedder.
+
+        Args:
+            embedding: pre-computed vector
+            doc_id: unique ID for this entry
+            document: human-readable label stored alongside (e.g. filename)
+            metadata: optional metadata dict
+        """
+        kwargs = dict(embeddings=[embedding], documents=[document], ids=[doc_id])
+        if metadata:
+            kwargs["metadatas"] = [metadata]
+        self.db._collection.add(**kwargs)
+        print(f"🟦 added embedding {doc_id[:8]}...")
+
+    def read_from_embedding(
+        self,
+        embedding: list[float],
+        topK: int = 3,
+        filter: Optional[dict] = None,
+        printResults: bool = False,
+    ):
+        """
+        Similarity search using a pre-computed query embedding.
+
+        Args:
+            embedding: pre-computed query vector (same space as stored embeddings)
+            topK: number of results to return
+            filter: metadata filter dict
+            printResults: whether to print results to console
+        """
+        results = self.db._collection.query(
+            query_embeddings=[embedding],
+            n_results=topK,
+            where=filter or None,
+            include=["documents", "metadatas", "distances"],
+        )
+        if printResults:
+            ids = results["ids"][0]
+            docs = results["documents"][0]  # type: ignore
+            metas = results["metadatas"][0]  # type: ignore
+            distances = results["distances"][0]  # type: ignore
+            for doc_id, doc, meta, dist in zip(ids, docs, metas, distances):
+                print(f"  id: {doc_id[:8]}... dist: {dist:.4f} doc: {doc[:60]}")
+                print(f"  metadata: {meta}")
+        return results
+
+    def update_from_embedding(
+        self,
+        query_embedding: list[float],
+        new_embedding: list[float],
+        new_document: str = "",
+        new_metadata: Optional[dict] = None,
+        confirm: bool = True,
+    ):
+        """
+        Interactive update: find candidates by embedding similarity, pick one, then replace its embedding.
+
+        Args:
+            query_embedding: vector to search with
+            new_embedding: replacement vector
+            new_document: replacement label/document string
+            new_metadata: replacement metadata (None keeps existing)
+            confirm: if True, prompt user to confirm before updating
+        """
+        raw = self.db._collection.query(
+            query_embeddings=[query_embedding],
+            n_results=5,
+            include=["documents", "metadatas"],
+        )
+        ids = raw["ids"][0]
+        docs = raw["documents"][0]  # type: ignore
+
+        if not ids:
+            print("🟥 No matching documents found")
+            return
+
+        print("Found matching documents:")
+        for i, (doc_id, text) in enumerate(zip(ids, docs)):
+            print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}")
+
+        choice = int(input("Which to update? (enter number, -1 to cancel): "))
+        if choice == -1:
+            print("Cancelled")
+            return
+
+        selected_id = ids[choice]
+        selected_text = docs[choice]
+
+        if confirm:
+            print(f"  Old: '{selected_text[:60]}'")
+            print(f"  New doc: '{new_document[:60]}'")
+            proceed = input("Confirm update? (y/n): ")
+            if proceed.lower() != "y":
+                print("Cancelled")
+                return
+
+        self.db._collection.update(
+            ids=[selected_id],
+            embeddings=[new_embedding],
+            documents=[new_document],
+            metadatas=[new_metadata or {}],
+        )
+        print(f"🟦 updated embedding {selected_id[:8]}...")
+
     def delete_by_id(self, doc_id: str):
         """
         Delete a document by its Chroma ID. Get IDs from readAll()["ids"].
@@ -246,14 +370,14 @@ class Ingest:
             search_query: text to search for matching documents
             confirm: if True, prompt user to confirm before deleting (default True)
         """
-        query_embedding = self.db.embeddings.embed_query(search_query)
+        query_embedding = self.db.embeddings.embed_query(search_query)  # type: ignore
         raw = self.db._collection.query(
             query_embeddings=[query_embedding],
             n_results=5,
             include=["documents", "metadatas"],
         )
         ids = raw["ids"][0]
-        docs = raw["documents"][0]
+        docs = raw["documents"][0]  # type: ignore
 
         if not ids:
             print("🟥 No matching documents found")
@@ -273,6 +397,47 @@ class Ingest:
 
         if confirm:
             print(f"  Deleting: '{selected_text[:60]}...'")
+            proceed = input("Confirm delete? (y/n): ")
+            if proceed.lower() != "y":
+                print("Cancelled")
+                return
+
+        self.delete_by_id(selected_id)
+
+    def delete_from_embedding(self, query_embedding: list[float], confirm: bool = True):
+        """
+        Interactive delete: find candidates by embedding similarity, pick one, then delete.
+
+        Args:
+            query_embedding: vector to search with
+            confirm: if True, prompt user to confirm before deleting
+        """
+        raw = self.db._collection.query(
+            query_embeddings=[query_embedding],
+            n_results=5,
+            include=["documents", "metadatas"],  # type: ignore
+        )
+        ids = raw["ids"][0]
+        docs = raw["documents"][0]  # type: ignore
+
+        if not ids:
+            print("🟥 No matching documents found")
+            return
+
+        print("Found matching documents:")
+        for i, (doc_id, text) in enumerate(zip(ids, docs)):
+            print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}")
+
+        choice = int(input("Which to delete? (enter number, -1 to cancel): "))
+        if choice == -1:
+            print("Cancelled")
+            return
+
+        selected_id = ids[choice]
+        selected_text = docs[choice]
+
+        if confirm:
+            print(f"  Deleting: '{selected_text[:60]}'")
             proceed = input("Confirm delete? (y/n): ")
             if proceed.lower() != "y":
                 print("Cancelled")
