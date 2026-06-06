@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src import ultimate_image_extractor
+from llm_client import ultimate_image_extractor
 from config import IMAGE_PATH
 
 print(

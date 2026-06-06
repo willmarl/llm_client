@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src import get_llm, run_llm
+from llm_client import get_llm, run_llm
 
 print("""
 Running llm tests of: get_llm(), run_llm()

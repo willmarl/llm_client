@@ -10,8 +10,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from langchain_core.embeddings import Embeddings
-from src.chroma_client import PrefixedEmbeddings
-from src.embedding.text_embedding import get_text_embeddings
+from llm_client.chroma_client import PrefixedEmbeddings
+from llm_client.embedding.text_embedding import get_text_embeddings
 
 print("""
 Running prefix behavior tests

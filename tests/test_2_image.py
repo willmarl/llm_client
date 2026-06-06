@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src import (
+from llm_client import (
     get_image_llm,
     generate_image_caption,
     generate_image_ocr_text,

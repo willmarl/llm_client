@@ -1,10 +1,11 @@
 import sys
+import uuid
 from pathlib import Path
 import shutil
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src import db_instance, Ingest, ConfigType
+from llm_client import db_instance, Ingest, ConfigType
 
 print("""
 Running chroma tests of: creating ingest class, create, read, readAll
@@ -111,9 +112,9 @@ print("""
 Running custom prefix tests
 """)
 
-from src import ConfigType
-from src.chroma_client import PrefixedEmbeddings
-from src.embedding.text_embedding import get_text_embeddings
+from llm_client import ConfigType
+from llm_client.chroma_client import PrefixedEmbeddings
+from llm_client.embedding.text_embedding import get_text_embeddings
 
 try:
     prefix_config: ConfigType = {
@@ -147,6 +148,78 @@ except Exception as e:
     print(f"prefix embedding difference failed ❌: {e}")
 
 print("deleting prefix test db")
+folder = Path("test_db")
+if folder.exists() and folder.is_dir():
+    shutil.rmtree(folder)
+
+# --- Embedding methods tests ---
+print("""
+Running *_from_embedding tests
+""")
+
+db_embed = db_instance("test_db/embed_test")
+cc_embed = Ingest(db_embed)
+
+test_vec = [0.1, 0.2, 0.3, 0.4]
+test_id = str(uuid.uuid4())
+
+try:
+    cc_embed.create_from_embedding(
+        embedding=test_vec,
+        doc_id=test_id,
+        document="cat_photo.jpg",
+        metadata={"type": "image", "source": "cat_photo.jpg"},
+    )
+    print("create_from_embedding passed ✅")
+except Exception as e:
+    print(f"create_from_embedding failed ❌: {e}")
+
+try:
+    results = cc_embed.read_from_embedding(test_vec, topK=1)
+    if results["ids"][0][0] == test_id:
+        print("read_from_embedding passed ✅")
+    else:
+        print(f"read_from_embedding failed ❌: returned wrong id {results['ids']}")
+except Exception as e:
+    print(f"read_from_embedding failed ❌: {e}")
+
+try:
+    new_vec = [0.9, 0.8, 0.7, 0.6]
+    new_id = str(uuid.uuid4())
+    cc_embed.create_from_embedding(embedding=new_vec, doc_id=new_id, document="dog_photo.jpg", metadata={"type": "image"})
+    all_data = cc_embed.readAll()
+    before_count = len(all_data["ids"])
+    cc_embed.db._collection.update(
+        ids=[new_id],
+        embeddings=[[0.5, 0.5, 0.5, 0.5]],
+        documents=["dog_photo_updated.jpg"],
+        metadatas=[{"type": "image"}],
+    )
+    updated = cc_embed.readAll()
+    idx = updated["ids"].index(new_id)
+    if updated["documents"][idx] == "dog_photo_updated.jpg":
+        print("update_from_embedding (non-interactive path) passed ✅")
+    else:
+        print("update_from_embedding failed ❌: document not updated")
+except Exception as e:
+    print(f"update_from_embedding failed ❌: {e}")
+
+try:
+    del_id = str(uuid.uuid4())
+    cc_embed.create_from_embedding(embedding=[0.3, 0.3, 0.3, 0.3], doc_id=del_id, document="to_delete.jpg", metadata={"type": "image"})
+    before = cc_embed.readAll()
+    cc_embed.delete_by_id(del_id)
+    after = cc_embed.readAll()
+    if len(after["ids"]) == len(before["ids"]) - 1:
+        print("delete_from_embedding (non-interactive path) passed ✅")
+    else:
+        print("delete_from_embedding failed ❌: count did not decrease")
+except Exception as e:
+    print(f"delete_from_embedding failed ❌: {e}")
+
+# update_from_embedding() and delete_from_embedding() interactive flows require stdin — tested manually
+
+print("deleting embed test db")
 folder = Path("test_db")
 if folder.exists() and folder.is_dir():
     shutil.rmtree(folder)

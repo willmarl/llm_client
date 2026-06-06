@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src import generate_image_embeddings
+from llm_client import generate_image_embeddings
 from config import IMAGE_PATH
 
 print(

@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src import load_raw_text, load_any_file, load_folder
+from llm_client import load_raw_text, load_any_file, load_folder
 from config import FILE_PATH, FOLDER_PATH
 
 print(

@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src import get_text_embeddings, generate_text_embeddings, embed_single, embed_many
+from llm_client import get_text_embeddings, generate_text_embeddings, embed_single, embed_many
 
 print(
     """
