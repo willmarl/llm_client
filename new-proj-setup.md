@@ -31,13 +31,24 @@ uv pip install torch torchvision
 
 ## 4. Install llm_client and CLIP
 
+From inside your new project folder, install using the path to this repo:
+
 ```bash
-uv pip install /home/cat/repos/llm_client
+uv pip install ~/repos/llm_client
 uv pip install git+https://github.com/openai/CLIP.git
 ```
 
-> Use `-e` flag if you want changes to llm_client to apply immediately:
-> `uv pip install -e /home/cat/repos/llm_client`
+**If you're actively editing llm_client at the same time**, use `-e` (editable) so changes apply immediately without reinstalling:
+
+```bash
+uv pip install -e ~/repos/llm_client
+```
+
+To confirm it installed:
+
+```bash
+python -c "import llm_client; print('ok')"
+```
 
 ## 5. Set up your .env
 
