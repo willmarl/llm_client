@@ -21,6 +21,45 @@ _"heres my task. heres a file of everything about me. use this prompt "You are a
 
 # install/setup
 
+## install variants
+
+Install the smallest variant that matches what you need:
+
+```bash
+# Tier 1: basic LLM + LangChain/LangGraph usage
+pip install llm_client
+
+# Tier 2: lightweight OCR/image loading, no torch or CLIP
+pip install 'llm_client[ocr]'
+
+# Vector DB / RAG helpers
+pip install 'llm_client[rag]'
+
+# Image embeddings via Replicate and image helper dependencies
+pip install 'llm_client[vision]'
+
+# Everything portable from PyPI
+pip install 'llm_client[full]'
+```
+
+The base install is meant for the common path:
+
+```python
+from llm_client import get_llm
+
+llm = get_llm()
+```
+
+`llm_client[full]` still does not install a platform-specific local PyTorch build. For local CLIP on AMD/ROCm, install torch from the PyTorch ROCm index first, then install CLIP for your platform.
+
+```bash
+uv pip install torch --index-url https://download.pytorch.org/whl/rocm6.2
+uv pip install torchvision
+uv pip install git+https://github.com/openai/CLIP.git
+```
+
+## environment
+
 In root project, make sure you `.env` has what`.env.template` contains.
 Change to your api keys, models, file locations, etc
 
@@ -57,9 +96,6 @@ REPLICATE_API_TOKEN=r8_xxx
 ```
 
 > Note some fields are optional if you know what your working with. ex: text only (can omit mulitmodal/image) or ollama only (can omit non-ollama models/api keys)
-
-Whilst in root project install `./llm/requirements.txt` (friendly reminder to use venv)
-Torch is not in requirements.txt due to how big it is. should install if using CLIP locally.
 
 ---
 

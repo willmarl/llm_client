@@ -17,12 +17,9 @@ from ..config import (
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_ollama import ChatOllama
-from langchain_openai import OpenAIEmbeddings
-from langchain_ollama import OllamaEmbeddings
 from pathlib import Path
 import base64
 from langchain_core.messages import AIMessage
-from langchain_community.document_loaders.image import UnstructuredImageLoader
 
 # ============================================
 # LLM FUNCTIONS
@@ -122,7 +119,7 @@ def generate_image_caption(
 def generate_image_ocr_text(
     image_path: str,
     languages: list[str] | None = None,
-    strategy: str = "hi_res",
+    strategy: str = "ocr_only",
     infer_table_structure: bool = False,
 ) -> str:
     """
@@ -135,7 +132,8 @@ def generate_image_ocr_text(
                    Common codes: eng (English), spa (Spanish), fra (French),
                                 deu (German), chi_sim (Chinese Simplified), jpn (Japanese)
         strategy: OCR processing strategy:
-                  - "hi_res" (default): High accuracy, slower
+                  - "ocr_only" (default): OCR without heavy layout inference
+                  - "hi_res": High accuracy, slower; may require llm_client[full]
                   - "fast": Faster processing, lower accuracy
                   - "ocr_only": Only OCR, no layout detection
         infer_table_structure: Whether to detect and preserve table structures
@@ -161,6 +159,13 @@ def generate_image_ocr_text(
     # Set default language if not specified
     if languages is None:
         languages = ["eng"]
+
+    try:
+        from langchain_community.document_loaders.image import UnstructuredImageLoader
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "generate_image_ocr_text requires OCR dependencies. Install with: pip install 'llm_client[ocr]'"
+        ) from exc
 
     loader = UnstructuredImageLoader(
         image_path,

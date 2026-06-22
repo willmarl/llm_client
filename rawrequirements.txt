@@ -1,20 +1,17 @@
 langchain
-rich
-langchain-chroma
 langchain-openai
 langchain-anthropic
 langchain-ollama
-langchain-community
-pillow
-replicate
-unstructured
-pdfminer-six
-pi-heif
-unstructured-inference
-pdf2image
-pytesseract
-unstructured-pytesseract
-questionary
-# git+https://github.com/openai/CLIP.git
-# torch --index-url https://download.pytorch.org/whl/rocm6.2
-# torchvision
+langchain-text-splitters
+langgraph
+python-dotenv
+pydantic
+rich
+
+# Optional installs:
+# pip install -e '.[ocr]'
+# pip install -e '.[rag]'
+# pip install -e '.[vision]'
+# pip install -e '.[full]'
+#
+# Local CLIP still needs manual torch/CLIP setup.

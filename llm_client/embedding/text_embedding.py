@@ -1,31 +1,14 @@
 from typing import List, Literal
 from ..config import (
     OPENAI_API_KEY,
-    ANTHROPIC_API_KEY,
     OLLAMA_HOST,
-    REPLICATE_API_TOKEN,
-    LLM_PROVIDER,
-    LLM_MODEL,
     TEXT_EMBEDDINGS_PROVIDER,
     TEXT_EMBEDDINGS_MODEL,
-    IMAGE_MODEL_PROVIDER,
-    IMAGE_MODEL,
-    REPLICATE_MODEL,
-    IMAGE_EMBEDDINGS_PROVIDER,
-    IMAGE_EMBEDDINGS_MODEL,
-    IMAGE_CAPTION_PROMPT,
     QUERY_PREFIX,
     DOCUMENT_PREFIX,
 )
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
-from langchain_ollama import ChatOllama
 from langchain_openai import OpenAIEmbeddings
 from langchain_ollama import OllamaEmbeddings
-from pathlib import Path
-import base64
-from langchain_core.messages import AIMessage
-from langchain_community.document_loaders.image import UnstructuredImageLoader
 
 # ============================================
 # TEXT EMBEDDINGS

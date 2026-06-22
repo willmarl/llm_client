@@ -1,8 +1,11 @@
 from pathlib import Path
 import sys
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
+
+pytest.importorskip("PIL", reason="install llm_client[vision] to run image embedding tests")
 
 from llm_client import generate_image_embeddings
 from config import IMAGE_PATH

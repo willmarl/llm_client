@@ -2,18 +2,6 @@ import mimetypes
 from pathlib import Path
 from langchain_core.documents import Document
 
-# LangChain community loaders
-from langchain_community.document_loaders import (
-    PyPDFLoader,
-    CSVLoader,
-    UnstructuredHTMLLoader,
-    UnstructuredMarkdownLoader,
-    UnstructuredPowerPointLoader,
-    UnstructuredWordDocumentLoader,
-    UnstructuredExcelLoader,
-    JSONLoader,
-)
-
 
 def load_raw_text(text: str):
     text_doc = Document(page_content=text, metadata={"type": "text"})
@@ -32,6 +20,22 @@ def load_any_file(path: str | Path):
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"No such file: {path}")
+
+    try:
+        from langchain_community.document_loaders import (
+            PyPDFLoader,
+            CSVLoader,
+            UnstructuredHTMLLoader,
+            UnstructuredMarkdownLoader,
+            UnstructuredPowerPointLoader,
+            UnstructuredWordDocumentLoader,
+            UnstructuredExcelLoader,
+            JSONLoader,
+        )
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "load_any_file requires optional loader dependencies. Install with: pip install 'llm_client[rag]'"
+        ) from exc
 
     mimetype, _ = mimetypes.guess_type(path)
     ext = path.suffix.lower()

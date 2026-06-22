@@ -1,32 +1,10 @@
 from typing import List
 from ..config import (
-    OPENAI_API_KEY,
-    ANTHROPIC_API_KEY,
-    OLLAMA_HOST,
-    REPLICATE_API_TOKEN,
-    LLM_PROVIDER,
-    LLM_MODEL,
-    TEXT_EMBEDDINGS_PROVIDER,
-    TEXT_EMBEDDINGS_MODEL,
-    IMAGE_MODEL_PROVIDER,
-    IMAGE_MODEL,
     REPLICATE_MODEL,
     IMAGE_EMBEDDINGS_PROVIDER,
     IMAGE_EMBEDDINGS_MODEL,
 )
-from PIL import Image
-import replicate
-import pybase64
 from pathlib import Path
-import base64
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
-from langchain_ollama import ChatOllama
-from langchain_openai import OpenAIEmbeddings
-from langchain_ollama import OllamaEmbeddings
-from langchain_core.documents import Document
-from langchain_core.embeddings import Embeddings
-from langchain_community.document_loaders.image import UnstructuredImageLoader
 
 # ============================================
 # IMAGE EMBEDDINGS (CLIP)
@@ -43,9 +21,16 @@ def _embed_image_local(path: str) -> List[float]:
     Returns:
         Embedding vector as list of floats
     """
-    import torch
-    import clip
     import warnings
+
+    try:
+        import torch
+        import clip
+        from PIL import Image
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "Local CLIP image embeddings require torch, CLIP, and Pillow. Install llm_client[full], then install torch/CLIP for your platform."
+        ) from exc
 
     # Suppress ROCm/HIP experimental feature warnings on AMD GPUs (e.g. Navi31/7900 XTX)
     warnings.filterwarnings("ignore", category=UserWarning, module="torch")
@@ -84,6 +69,14 @@ def _embed_image_replicate(path: str) -> List[float]:
         Embedding vector as list of floats
     """
     print(f"  ☁️  Processing with Replicate CLIP...")
+
+    try:
+        import pybase64
+        import replicate
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "Replicate image embeddings require optional dependencies. Install with: pip install 'llm_client[vision]'"
+        ) from exc
 
     base64_image = pybase64.b64encode(Path(path).read_bytes()).decode("utf-8")
     data_uri = f"data:image/jpeg;base64,{base64_image}"

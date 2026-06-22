@@ -1,6 +1,5 @@
 from typing import Literal, Optional, TypedDict, Union
 from rich import print
-from langchain_chroma import Chroma
 from .embedding.text_embedding import get_text_embeddings
 from .config import VECTOR_DB_LOCATION, QUERY_PREFIX, DOCUMENT_PREFIX
 from .splitter import splitter
@@ -31,6 +30,13 @@ def db_instance(
     document_prefix: str = DOCUMENT_PREFIX,
 ):
     print(f"🟦🗄️⏳ Creating DB instance at {db_location}, will take some time (~10sec)")
+    try:
+        from langchain_chroma import Chroma
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "db_instance requires Chroma dependencies. Install with: pip install 'llm_client[rag]'"
+        ) from exc
+
     embeddings = PrefixedEmbeddings(
         get_text_embeddings(), query_prefix, document_prefix
     )

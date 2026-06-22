@@ -1,8 +1,11 @@
 from pathlib import Path
 import sys
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
+
+pytest.importorskip("PIL", reason="install llm_client[full] to run ultimate image extractor tests")
 
 from llm_client import ultimate_image_extractor
 from config import IMAGE_PATH

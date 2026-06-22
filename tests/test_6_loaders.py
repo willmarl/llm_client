@@ -1,8 +1,11 @@
 from pathlib import Path
 import sys
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
+
+pytest.importorskip("langchain_community", reason="install llm_client[rag] to run loader tests")
 
 from llm_client import load_raw_text, load_any_file, load_folder
 from config import FILE_PATH, FOLDER_PATH

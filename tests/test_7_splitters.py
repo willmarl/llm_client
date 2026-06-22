@@ -1,8 +1,11 @@
 from pathlib import Path
 import sys
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
+
+pytest.importorskip("langchain_community", reason="install llm_client[rag] to run splitter loader tests")
 
 from llm_client import load_any_file, splitter
 from config import FILE_PATH

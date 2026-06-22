@@ -2,8 +2,11 @@ import sys
 import uuid
 from pathlib import Path
 import shutil
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+pytest.importorskip("langchain_chroma", reason="install llm_client[rag] to run Chroma tests")
 
 from llm_client import db_instance, Ingest, ConfigType
 

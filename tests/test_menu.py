@@ -1,5 +1,9 @@
 import subprocess
 import sys
+import pytest
+
+pytest.importorskip("questionary", reason="install llm_client[full] to run the interactive test menu")
+
 import questionary
 from questionary import Choice
 

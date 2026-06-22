@@ -8,23 +8,51 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "langchain>=1.2",
-    "langchain-chroma",
     "langchain-openai",
     "langchain-anthropic",
     "langchain-ollama",
-    "langchain-community",
+    "langchain-text-splitters",
+    "langgraph",
+    "python-dotenv",
+    "pydantic",
     "rich",
+]
+
+[project.optional-dependencies]
+ocr = [
     "pillow",
-    "replicate",
+    "langchain-community",
     "unstructured",
     "pdfminer-six",
     "pi-heif",
-    "unstructured-inference",
     "pdf2image",
     "pytesseract",
     "unstructured-pytesseract",
+]
+rag = [
+    "langchain-chroma",
+    "langchain-community",
+]
+vision = [
+    "pillow",
+    "replicate",
+    "pybase64",
+]
+full = [
+    "pillow",
+    "langchain-community",
+    "unstructured",
+    "pdfminer-six",
+    "pi-heif",
+    "pdf2image",
+    "pytesseract",
+    "unstructured-pytesseract",
+    "langchain-chroma",
+    "replicate",
+    "pybase64",
+    "unstructured-inference",
     "questionary",
-    # torch and CLIP require manual install — see setup.md
+    # torch and CLIP require manual install — see docs/index.md
 ]
 
 [tool.setuptools.packages.find]
