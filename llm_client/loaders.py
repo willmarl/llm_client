@@ -1,6 +1,7 @@
 import mimetypes
 from pathlib import Path
 from langchain_core.documents import Document
+from .config import log_print
 
 
 def load_raw_text(text: str):
@@ -85,8 +86,8 @@ def load_folder(folder: str | Path, recursive: bool = True, verbose: bool = True
                 docs = load_any_file(str(path))
                 all_docs.extend(docs)
                 if verbose:
-                    print(f"Loaded {len(docs)} docs from {path}")
+                    log_print(f"Loaded {len(docs)} docs from {path}")
             except Exception as e:
                 if verbose:
-                    print(f"Skipping {path}: {e}")
+                    log_print(f"Skipping {path}: {e}")
     return all_docs

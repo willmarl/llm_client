@@ -12,6 +12,7 @@ from ..config import (
     REPLICATE_MODEL,
     IMAGE_EMBEDDINGS_PROVIDER,
     IMAGE_EMBEDDINGS_MODEL,
+    log_print,
 )
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
@@ -34,7 +35,7 @@ def get_llm(temperature: float = 0.7):
     Returns:
         LLM instance (ChatOpenAI, ChatAnthropic, or ChatOllama)
     """
-    print(f"🤖 Initializing LLM: {LLM_PROVIDER} ({LLM_MODEL}) - Temperature: {temperature}")
+    log_print(f"🤖 Initializing LLM: {LLM_PROVIDER} ({LLM_MODEL}) - Temperature: {temperature}")
 
     if LLM_PROVIDER == "openai":
         return ChatOpenAI(model=LLM_MODEL, api_key=OPENAI_API_KEY, temperature=temperature)

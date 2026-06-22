@@ -13,6 +13,7 @@ from ..config import (
     IMAGE_EMBEDDINGS_PROVIDER,
     IMAGE_EMBEDDINGS_MODEL,
     IMAGE_CAPTION_PROMPT,
+    log_print,
 )
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
@@ -33,7 +34,7 @@ def get_image_llm():
     Returns:
         Vision-capable LLM instance
     """
-    print(f"👁️ Initializing vision LLM: {IMAGE_MODEL_PROVIDER} ({IMAGE_MODEL})")
+    log_print(f"👁️ Initializing vision LLM: {IMAGE_MODEL_PROVIDER} ({IMAGE_MODEL})")
 
     if IMAGE_MODEL_PROVIDER == "openai":
         return ChatOpenAI(model=IMAGE_MODEL, api_key=OPENAI_API_KEY)
@@ -75,7 +76,7 @@ def generate_image_caption(
         ...     prompt="List all visible objects"
         ... )
     """
-    print(f"🤖 Generating caption for: {Path(image_path).name}")
+    log_print(f"🤖 Generating caption for: {Path(image_path).name}")
 
     llm = get_image_llm()
 
@@ -104,7 +105,7 @@ def generate_image_caption(
     )
 
     response = llm.invoke([message])
-    print(f"✅ Caption generated successfully")
+    log_print(f"✅ Caption generated successfully")
     if full_response:
         return response
     else:
@@ -154,7 +155,7 @@ def generate_image_ocr_text(
         >>> # Extract table data
         >>> text = generate_image_ocr_text("invoice.jpg", infer_table_structure=True)
     """
-    print(f"📄 Extracting text from: {Path(image_path).name}")
+    log_print(f"📄 Extracting text from: {Path(image_path).name}")
 
     # Set default language if not specified
     if languages is None:
@@ -176,6 +177,6 @@ def generate_image_ocr_text(
     docs = loader.load()
 
     extracted_text = "\n".join([doc.page_content for doc in docs])
-    print(f"✅ Extracted {len(extracted_text)} characters")
+    log_print(f"✅ Extracted {len(extracted_text)} characters")
 
     return extracted_text

@@ -6,6 +6,21 @@ load_dotenv()
 
 # empty string "" added to avoid intellisense yelling
 
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+PRINT_LOG = _env_bool("PRINT_LOG")
+
+
+def log_print(*args, **kwargs) -> None:
+    if PRINT_LOG:
+        print(*args, **kwargs)
+
 # LLM Settings
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "")

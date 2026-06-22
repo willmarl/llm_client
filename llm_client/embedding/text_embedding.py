@@ -6,6 +6,7 @@ from ..config import (
     TEXT_EMBEDDINGS_MODEL,
     QUERY_PREFIX,
     DOCUMENT_PREFIX,
+    log_print,
 )
 from langchain_openai import OpenAIEmbeddings
 from langchain_ollama import OllamaEmbeddings
@@ -29,9 +30,9 @@ def generate_text_embeddings(texts: List[str]) -> List[List[float]]:
         List of embedding vectors
     """
     embeddings_model = get_text_embeddings()
-    print(f"📝 Generating embeddings for {len(texts)} texts...")
+    log_print(f"📝 Generating embeddings for {len(texts)} texts...")
     embeddings = embeddings_model.embed_documents(texts)
-    print(f"✅ Generated embeddings with dimension: {len(embeddings[0])}")
+    log_print(f"✅ Generated embeddings with dimension: {len(embeddings[0])}")
     return embeddings
 
 
@@ -66,9 +67,9 @@ def embed_single(
         final_text = f"{custom_prefix}{text}"
 
     embeddings_model = get_text_embeddings()
-    print(f"📝 Embedding text (prefix={prefix}): {final_text[:50]}...")
+    log_print(f"📝 Embedding text (prefix={prefix}): {final_text[:50]}...")
     embedding = embeddings_model.embed_query(final_text)
-    print(f"✅ Generated embedding with dimension: {len(embedding)}")
+    log_print(f"✅ Generated embedding with dimension: {len(embedding)}")
     return embedding
 
 
@@ -105,9 +106,9 @@ def embed_many(
             final_texts.append(f"{custom_prefix}{text}")
 
     embeddings_model = get_text_embeddings()
-    print(f"📝 Embedding {len(texts)} texts (prefix={prefix})...")
+    log_print(f"📝 Embedding {len(texts)} texts (prefix={prefix})...")
     embeddings = embeddings_model.embed_documents(final_texts)
-    print(f"✅ Generated embeddings with dimension: {len(embeddings[0])}")
+    log_print(f"✅ Generated embeddings with dimension: {len(embeddings[0])}")
     return embeddings
 
 
@@ -118,7 +119,7 @@ def get_text_embeddings():
     Returns:
         Text embeddings instance (OpenAIEmbeddings or OllamaEmbeddings)
     """
-    print(
+    log_print(
         f"📝 Initializing text embeddings: {TEXT_EMBEDDINGS_PROVIDER} ({TEXT_EMBEDDINGS_MODEL})"
     )
 

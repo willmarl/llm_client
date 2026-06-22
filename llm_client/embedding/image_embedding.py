@@ -3,6 +3,7 @@ from ..config import (
     REPLICATE_MODEL,
     IMAGE_EMBEDDINGS_PROVIDER,
     IMAGE_EMBEDDINGS_MODEL,
+    log_print,
 )
 from pathlib import Path
 
@@ -44,9 +45,9 @@ def _embed_image_local(path: str) -> List[float]:
             backend = f"ROCm {hip_version.split('-')[0]} (AMD)"
         else:
             backend = "CUDA (NVIDIA)"
-        print(f"  🔄 Processing with local CLIP on GPU: {gpu_name} via {backend}...")
+        log_print(f"  🔄 Processing with local CLIP on GPU: {gpu_name} via {backend}...")
     else:
-        print(f"  🔄 Processing with local CLIP on CPU...")
+        log_print(f"  🔄 Processing with local CLIP on CPU...")
 
     model, preprocess = clip.load(IMAGE_EMBEDDINGS_MODEL, device=device)
     image = preprocess(Image.open(path)).unsqueeze(0).to(device)  # type: ignore
@@ -68,7 +69,7 @@ def _embed_image_replicate(path: str) -> List[float]:
     Returns:
         Embedding vector as list of floats
     """
-    print(f"  ☁️  Processing with Replicate CLIP...")
+    log_print(f"  ☁️  Processing with Replicate CLIP...")
 
     try:
         import pybase64

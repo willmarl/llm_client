@@ -1,7 +1,6 @@
 from typing import Literal, Optional, TypedDict, Union
-from rich import print
 from .embedding.text_embedding import get_text_embeddings
-from .config import VECTOR_DB_LOCATION, QUERY_PREFIX, DOCUMENT_PREFIX
+from .config import VECTOR_DB_LOCATION, QUERY_PREFIX, DOCUMENT_PREFIX, log_print
 from .splitter import splitter
 from .loaders import load_raw_text, load_any_file
 from langchain_core.documents import Document
@@ -29,7 +28,7 @@ def db_instance(
     query_prefix: str = QUERY_PREFIX,
     document_prefix: str = DOCUMENT_PREFIX,
 ):
-    print(f"🟦🗄️⏳ Creating DB instance at {db_location}, will take some time (~10sec)")
+    log_print(f"🟦🗄️⏳ Creating DB instance at {db_location}, will take some time (~10sec)")
     try:
         from langchain_chroma import Chroma
     except ModuleNotFoundError as exc:
@@ -100,7 +99,7 @@ class Ingest:
         self.config: _ResolvedConfig = {**configDefault, **(config or {})}  # type: ignore[typeddict-item]
 
         if db == None:
-            print(
+            log_print(
                 f"🟦No DB passed, will attempt to use DB based off configs: {self.config['db_location']}"
             )
             db = db_instance(
@@ -109,7 +108,7 @@ class Ingest:
                 self.config["document_prefix"],
             )
         else:
-            print(f"🟦using db {db}")
+            log_print(f"🟦using db {db}")
 
         self.db = db
 
@@ -148,12 +147,12 @@ class Ingest:
             )
             data = chunks
 
-        print(data)
+        log_print(data)
 
         if not isinstance(data, list):
             data = [data]
 
-        print("🟦 adding to DB")
+        log_print("🟦 adding to DB")
         self.db.add_documents(data)
 
     def read(
@@ -172,13 +171,13 @@ class Ingest:
             filter: metadata filter dict, e.g. {"source": "file.txt"} or {"topic": "backend"}
             printResults: whether to print results to console
         """
-        print("🟦reading from db")
+        log_print("🟦reading from db")
         results = self.db.similarity_search(query, k=topK, filter=filter)
         if printResults:
             for r in results:
-                print("Content:", r.page_content)
-                print("Metadata:", end="")
-                print(r.metadata)
+                log_print("Content:", r.page_content)
+                log_print("Metadata:", end="")
+                log_print(r.metadata)
         return results
 
     def readAll(self, filter: Optional[dict] = None):
@@ -203,7 +202,7 @@ class Ingest:
         self.db.update_document(
             doc_id, Document(page_content=new_content, metadata={"type": "text"})
         )
-        print(f"🟦 updated document {doc_id[:8]}...")
+        log_print(f"🟦 updated document {doc_id[:8]}...")
 
     def update(self, search_query: str, new_content: str, confirm: bool = True):
         """
@@ -224,27 +223,27 @@ class Ingest:
         docs = raw["documents"][0]  # type: ignore
 
         if not ids:
-            print("🟥 No matching documents found")
+            log_print("🟥 No matching documents found")
             return
 
-        print("Found matching documents:")
+        log_print("Found matching documents:")
         for i, (doc_id, text) in enumerate(zip(ids, docs)):
-            print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}...")
+            log_print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}...")
 
         choice = int(input("Which to update? (enter number, -1 to cancel): "))
         if choice == -1:
-            print("Cancelled")
+            log_print("Cancelled")
             return
 
         selected_id = ids[choice]
         selected_text = docs[choice]
 
         if confirm:
-            print(f"  Old: '{selected_text[:60]}...'")
-            print(f"  New: '{new_content[:60]}...'")
+            log_print(f"  Old: '{selected_text[:60]}...'")
+            log_print(f"  New: '{new_content[:60]}...'")
             proceed = input("Confirm update? (y/n): ")
             if proceed.lower() != "y":
-                print("Cancelled")
+                log_print("Cancelled")
                 return
 
         self.update_by_id(selected_id, new_content)
@@ -269,7 +268,7 @@ class Ingest:
         if metadata:
             kwargs["metadatas"] = [metadata]
         self.db._collection.add(**kwargs)
-        print(f"🟦 added embedding {doc_id[:8]}...")
+        log_print(f"🟦 added embedding {doc_id[:8]}...")
 
     def read_from_embedding(
         self,
@@ -299,8 +298,8 @@ class Ingest:
             metas = results["metadatas"][0]  # type: ignore
             distances = results["distances"][0]  # type: ignore
             for doc_id, doc, meta, dist in zip(ids, docs, metas, distances):
-                print(f"  id: {doc_id[:8]}... dist: {dist:.4f} doc: {doc[:60]}")
-                print(f"  metadata: {meta}")
+                log_print(f"  id: {doc_id[:8]}... dist: {dist:.4f} doc: {doc[:60]}")
+                log_print(f"  metadata: {meta}")
         return results
 
     def update_from_embedding(
@@ -330,27 +329,27 @@ class Ingest:
         docs = raw["documents"][0]  # type: ignore
 
         if not ids:
-            print("🟥 No matching documents found")
+            log_print("🟥 No matching documents found")
             return
 
-        print("Found matching documents:")
+        log_print("Found matching documents:")
         for i, (doc_id, text) in enumerate(zip(ids, docs)):
-            print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}")
+            log_print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}")
 
         choice = int(input("Which to update? (enter number, -1 to cancel): "))
         if choice == -1:
-            print("Cancelled")
+            log_print("Cancelled")
             return
 
         selected_id = ids[choice]
         selected_text = docs[choice]
 
         if confirm:
-            print(f"  Old: '{selected_text[:60]}'")
-            print(f"  New doc: '{new_document[:60]}'")
+            log_print(f"  Old: '{selected_text[:60]}'")
+            log_print(f"  New doc: '{new_document[:60]}'")
             proceed = input("Confirm update? (y/n): ")
             if proceed.lower() != "y":
-                print("Cancelled")
+                log_print("Cancelled")
                 return
 
         self.db._collection.update(
@@ -359,14 +358,14 @@ class Ingest:
             documents=[new_document],
             metadatas=[new_metadata or {}],
         )
-        print(f"🟦 updated embedding {selected_id[:8]}...")
+        log_print(f"🟦 updated embedding {selected_id[:8]}...")
 
     def delete_by_id(self, doc_id: str):
         """
         Delete a document by its Chroma ID. Get IDs from readAll()["ids"].
         """
         self.db.delete(ids=[doc_id])
-        print(f"🟦 deleted document {doc_id[:8]}...")
+        log_print(f"🟦 deleted document {doc_id[:8]}...")
 
     def delete(self, search_query: str, confirm: bool = True):
         """
@@ -386,26 +385,26 @@ class Ingest:
         docs = raw["documents"][0]  # type: ignore
 
         if not ids:
-            print("🟥 No matching documents found")
+            log_print("🟥 No matching documents found")
             return
 
-        print("Found matching documents:")
+        log_print("Found matching documents:")
         for i, (doc_id, text) in enumerate(zip(ids, docs)):
-            print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}...")
+            log_print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}...")
 
         choice = int(input("Which to delete? (enter number, -1 to cancel): "))
         if choice == -1:
-            print("Cancelled")
+            log_print("Cancelled")
             return
 
         selected_id = ids[choice]
         selected_text = docs[choice]
 
         if confirm:
-            print(f"  Deleting: '{selected_text[:60]}...'")
+            log_print(f"  Deleting: '{selected_text[:60]}...'")
             proceed = input("Confirm delete? (y/n): ")
             if proceed.lower() != "y":
-                print("Cancelled")
+                log_print("Cancelled")
                 return
 
         self.delete_by_id(selected_id)
@@ -427,26 +426,26 @@ class Ingest:
         docs = raw["documents"][0]  # type: ignore
 
         if not ids:
-            print("🟥 No matching documents found")
+            log_print("🟥 No matching documents found")
             return
 
-        print("Found matching documents:")
+        log_print("Found matching documents:")
         for i, (doc_id, text) in enumerate(zip(ids, docs)):
-            print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}")
+            log_print(f"  [{i}] (id: {doc_id[:8]}...) {text[:60]}")
 
         choice = int(input("Which to delete? (enter number, -1 to cancel): "))
         if choice == -1:
-            print("Cancelled")
+            log_print("Cancelled")
             return
 
         selected_id = ids[choice]
         selected_text = docs[choice]
 
         if confirm:
-            print(f"  Deleting: '{selected_text[:60]}'")
+            log_print(f"  Deleting: '{selected_text[:60]}'")
             proceed = input("Confirm delete? (y/n): ")
             if proceed.lower() != "y":
-                print("Cancelled")
+                log_print("Cancelled")
                 return
 
         self.delete_by_id(selected_id)
